@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subbase — how many tonnes of aggregate you really need</title>
+  <meta name="description" content="Aggregate is sold by weight, not volume, and a sub-base compacts so you order more than the hole holds. Subbase turns the area and depth into tonnes, bulk bags and a loose volume, using the material's bulk density. Runs in your browser; nothing you type is uploaded.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237d6a4f'/%3E%3Cg fill='%23fff'%3E%3Crect x='6' y='19' width='20' height='6' rx='1'/%3E%3Crect x='6' y='12' width='20' height='5' rx='1' opacity='.75'/%3E%3Ccircle cx='10' cy='8' r='2.4'/%3E%3Ccircle cx='17' cy='7' r='2'/%3E%3Ccircle cx='22' cy='9' r='1.8'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1><span class="logo" aria-hidden="true"></span> Subbase</h1>
+      <p class="tag">Aggregate is sold by weight, not volume, and a sub-base compacts so you order more than the hole holds. Subbase turns the area and depth into tonnes, bulk bags and a loose volume to order, from the material's bulk density. For MOT Type 1 and gravel through to sand and slate.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <form id="form" class="card" autocomplete="off">
+      <fieldset class="group">
+        <legend>The area</legend>
+        <div class="field-row">
+          <label class="field">
+            <span>Length</span>
+            <input id="length" inputmode="decimal" placeholder="e.g. 5">
+          </label>
+          <label class="field">
+            <span>Width</span>
+            <input id="width" inputmode="decimal" placeholder="e.g. 4">
+          </label>
+          <label class="field narrow">
+            <span>in</span>
+            <select id="len-unit">
+              <option value="m">metres</option>
+              <option value="cm">cm</option>
+              <option value="ft">feet</option>
+              <option value="yd">yards</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span>or area straight in</span>
+            <input id="area" inputmode="decimal" placeholder="optional, in the unit above, squared">
+          </label>
+          <label class="field narrow">
+            <span>Depth</span>
+            <input id="depth" inputmode="decimal" placeholder="e.g. 100">
+          </label>
+          <label class="field narrow">
+            <span>deep in</span>
+            <select id="depth-unit">
+              <option value="mm" selected>mm</option>
+              <option value="cm">cm</option>
+              <option value="in">inches</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">Give a length and width, or type the area if you have it. For an odd shape, split it into rectangles and add them up. A driveway sub-base is usually 100 to 150 mm; a decorative gravel topping 40 to 50 mm.</p>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>The material</legend>
+        <div class="field-row">
+          <label class="field">
+            <span>Material</span>
+            <select id="material">
+              <option value="mot1">MOT Type 1 sub-base</option>
+              <option value="scalpings">Crushed stone / scalpings</option>
+              <option value="ballast">All-in ballast (sand + gravel)</option>
+              <option value="gravel">Gravel / shingle (10-20 mm)</option>
+              <option value="pea">Pea gravel</option>
+              <option value="sharp">Sharp / grit sand</option>
+              <option value="soft">Building / soft sand</option>
+              <option value="slate">Slate chippings</option>
+              <option value="topsoil">Topsoil (loose)</option>
+              <option value="custom">Custom material</option>
+            </select>
+          </label>
+          <label class="field narrow">
+            <span>Bulk density</span>
+            <input id="density" inputmode="decimal" placeholder="2.0">
+          </label>
+          <span class="field narrow unit-note" aria-hidden="true">tonnes / m&sup3;</span>
+        </div>
+        <p class="hint">The density is what turns volume into tonnes. These are typical figures; confirm the density on the supplier's own product page, especially for Custom. Moisture changes it, so a wet load weighs more.</p>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>Allowances</legend>
+        <div class="field-row">
+          <label class="field check">
+            <input id="compact" type="checkbox">
+            <span>Compacted to depth (sub-base)</span>
+          </label>
+          <label class="field narrow">
+            <span>Compaction %</span>
+            <input id="compaction" inputmode="decimal" placeholder="15">
+          </label>
+          <label class="field narrow">
+            <span>Waste %</span>
+            <input id="waste" inputmode="decimal" placeholder="10">
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field narrow">
+            <span>Bulk bag weight</span>
+            <input id="bag-kg" inputmode="decimal" placeholder="850">
+          </label>
+          <label class="field narrow">
+            <span>Price</span>
+            <input id="price" inputmode="decimal" placeholder="optional">
+          </label>
+          <label class="field narrow">
+            <span>per</span>
+            <select id="price-unit">
+              <option value="tonne">tonne</option>
+              <option value="bag">bulk bag</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">A sub-base is whacked down and loses height, so the compaction allowance orders extra loose material to reach your depth. Waste covers spillage and levelling. A dumpy bag is usually about 850 kg, but check the supplier's.</p>
+      </fieldset>
+    </form>
+
+    <div class="out" id="out" aria-live="polite"></div>
+
+    <div class="actions">
+      <button id="share" class="ghost" type="button">Copy a link to this</button>
+      <span id="share-done" class="share-done" aria-live="polite"></span>
+    </div>
+
+    <section class="note">
+      <h2>Why weight, not volume</h2>
+      <p>Aggregate is delivered and priced by the tonne, but a job is measured in volume: the area you're covering times
+      the depth you want. The bridge between the two is the bulk density, how heavy a cubic metre of that material is. A
+      cubic metre of MOT Type 1 weighs about two tonnes; the same cubic metre of light slate chippings is nearer 1.3, so
+      the same hole needs very different tonnage. A sub-base adds a second step: it goes down loose and is then compacted
+      with a plate, losing roughly a tenth of its height, so you order extra loose material to end up at the depth you
+      want once it's whacked down. Decorative gravel you just rake level, so it gets no compaction allowance. Subbase
+      works out the finished volume, the loose volume to order, the tonnes, the bulk bags and a waste margin, and shows
+      the coverage per tonne so you can check it against a supplier's own figure. These are planning numbers: densities
+      shift with moisture and the exact stone, so use the supplier's density when you place the order.</p>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Everything runs in your browser. Nothing you type is uploaded. <a href="https://github.com/johanthegoatt/subbase">Source</a>.</p>
+  </footer>
+
+  <!-- Grit the pebble -->
+  <div id="grit-dock" class="grit-dock">
+    <button id="grit-hide" class="grit-hide" type="button" aria-label="Hide Grit">tuck away</button>
+    <div id="grit-bubble" class="grit-bubble" role="status" aria-live="polite"></div>
+    <button id="grit" class="grit" type="button" data-mood="calm" aria-label="Grit the pebble. Tap for a tip.">
+      <span class="grit-body" aria-hidden="true">
+        <span class="grit-stone">
+          <span class="grit-face">
+            <span class="grit-eye l"></span>
+            <span class="grit-eye r"></span>
+            <span class="grit-mouth"></span>
+          </span>
+        </span>
+        <span class="grit-shadow"></span>
+      </span>
+    </button>
+  </div>
+
+  <script src="src/core.js"></script>
+  <script src="src/grit.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
