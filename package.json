@@ -1,0 +1,10 @@
+{
+  "name": "subbase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "How many tonnes of aggregate a job really needs. Turns the area and depth into tonnes, bulk bags and a loose volume using the material's bulk density, with a compaction allowance for a sub-base. Runs in the browser, nothing uploaded. With Grit the pebble.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
