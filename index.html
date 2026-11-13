@@ -57,6 +57,27 @@
             </select>
           </label>
         </div>
+        <div class="field-row">
+          <label class="field">
+            <span>Not sure how deep? Pick the job</span>
+            <select id="use">
+              <option value="">— choose a job —</option>
+              <option value="path">Garden path (on foot)</option>
+              <option value="patio">Patio (light foot traffic)</option>
+              <option value="shed">Shed or greenhouse base</option>
+              <option value="driveway">Driveway (cars, light vans)</option>
+              <option value="heavy">Heavy use (vans, occasional lorry)</option>
+            </select>
+          </label>
+          <label class="field narrow">
+            <span>Ground</span>
+            <select id="use-ground">
+              <option value="firm">Firm</option>
+              <option value="soft">Soft / clay</option>
+            </select>
+          </label>
+        </div>
+        <p id="use-note" class="hint" hidden></p>
         <p class="hint">Give a length and width, or type the area if you have it. For an odd shape, split it into rectangles and add them up. A driveway sub-base is usually 100 to 150 mm; a decorative gravel topping 40 to 50 mm.</p>
       </fieldset>
 

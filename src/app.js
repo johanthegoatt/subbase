@@ -174,6 +174,25 @@
   el.material.addEventListener("change", function () { onMaterial(false); recompute(); });
   el.compact.addEventListener("change", function () { onCompact(); recompute(); });
 
+  // Picking a job fills the depth with the typical sub-base figure for that use
+  // and ground, ticks "compacted", and explains why. The depth stays editable.
+  function onUse() {
+    var use = $("use").value;
+    var note = $("use-note");
+    if (!use) { note.hidden = true; return; }
+    var d = S.typicalDepth(use, $("use-ground").value);
+    if (!d) { note.hidden = true; return; }
+    el.depth.value = d.mm;
+    el["depth-unit"].value = "mm";
+    el.compact.checked = true;
+    onCompact();
+    note.hidden = false;
+    note.textContent = d.label + ": about " + d.mm + " mm (" + d.min + "–" + d.max + " mm). " + d.note;
+    if (window.Grit) window.Grit.context("area");
+  }
+  $("use").addEventListener("change", function () { onUse(); recompute(); });
+  $("use-ground").addEventListener("change", function () { if ($("use").value) { onUse(); recompute(); } });
+
   ids.forEach(function (id) {
     el[id].addEventListener("input", recompute);
     el[id].addEventListener("change", recompute);
