@@ -201,6 +201,44 @@
     return tips;
   }
 
+  // Typical compacted sub-base depths by what the surface carries. The depth a
+  // job needs is the thing a tonnage sum can't tell you, and it's the usual
+  // reason a path or drive fails early — too thin for the load. These are the
+  // common UK ranges: a pedestrian path wants little, a patio more, and a
+  // driveway more again, with soft or clay ground pushing every job to the
+  // upper end and needing a geotextile membrane under the stone so the subsoil
+  // doesn't work up into it. Figures from aggregate suppliers' sub-base depth
+  // guides (Materials Market, Marshalls, Primethorpe Paving); the ground and a
+  // look at the dug base decide the final depth.
+  var USES = {
+    "path":     { label: "Garden path (on foot)",        min: 50,  max: 75,  typical: 75 },
+    "patio":    { label: "Patio (light foot traffic)",   min: 100, max: 150, typical: 100 },
+    "shed":     { label: "Shed or greenhouse base",      min: 100, max: 150, typical: 100 },
+    "driveway": { label: "Driveway (cars, light vans)",  min: 150, max: 200, typical: 150 },
+    "heavy":    { label: "Heavy use (vans, occasional lorry)", min: 200, max: 300, typical: 200 }
+  };
+
+  // Suggest a sub-base depth in mm for a job and ground. Soft or clay ground
+  // takes the upper end and a membrane; firm ground takes the typical figure.
+  function typicalDepth(use, ground) {
+    var u = USES[use];
+    if (!u) return null;
+    var soft = ground === "soft";
+    var mm = soft ? u.max : u.typical;
+    var note = soft
+      ? "Soft or clay ground, so take the deeper end and lay a geotextile membrane under the stone to keep the subsoil out of it."
+      : "Firm ground. If the base digs out soft or wet, go to " + u.max + " mm and add a membrane.";
+    return {
+      use: use,
+      label: u.label,
+      min: u.min,
+      max: u.max,
+      mm: mm,
+      membrane: soft,
+      note: note
+    };
+  }
+
   // The whole input goes in the URL fragment, which a browser never sends to a
   // server, so a shared link reopens on the same job without anything leaving
   // the device.
@@ -221,9 +259,10 @@
   }
 
   return {
-    IN: IN, FT: FT, YD: YD, MATERIALS: MATERIALS,
+    IN: IN, FT: FT, YD: YD, MATERIALS: MATERIALS, USES: USES,
     toM: toM, areaToM2: areaToM2, area: area,
     round1: round1, round2: round2, round3: round3,
+    typicalDepth: typicalDepth,
     plan: plan, advise: advise, pack: pack, unpack: unpack
   };
 });

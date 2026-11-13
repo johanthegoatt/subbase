@@ -136,3 +136,25 @@ test("every material has a sane density and the labels are set", () => {
     assert.strictEqual(typeof mdef.compacts, "boolean", k + " marks compaction");
   });
 });
+
+test("typical depth climbs from path to patio to driveway", function () {
+  var path = S.typicalDepth("path", "firm");
+  var patio = S.typicalDepth("patio", "firm");
+  var drive = S.typicalDepth("driveway", "firm");
+  assert.ok(path.mm < patio.mm, "a path is thinner than a patio");
+  assert.ok(patio.mm < drive.mm, "a patio is thinner than a driveway");
+  assert.strictEqual(drive.mm, 150);
+});
+
+test("soft ground takes the deeper end and calls for a membrane", function () {
+  var firm = S.typicalDepth("driveway", "firm");
+  var soft = S.typicalDepth("driveway", "soft");
+  assert.ok(soft.mm > firm.mm, "soft ground is deeper");
+  assert.strictEqual(soft.mm, 200);
+  assert.strictEqual(soft.membrane, true);
+  assert.strictEqual(firm.membrane, false);
+});
+
+test("an unknown job gives no suggestion", function () {
+  assert.strictEqual(S.typicalDepth("spaceport", "firm"), null);
+});
