@@ -7,7 +7,8 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var ids = ["length", "width", "area", "len-unit", "depth", "depth-unit",
-    "material", "density", "compact", "compaction", "waste", "bag-kg", "price", "price-unit"];
+    "material", "density", "compact", "compaction", "waste", "bag-kg", "price", "price-unit",
+    "laying", "laying-depth"];
   var el = {};
   ids.forEach(function (id) { el[id] = $(id); });
   var out = $("out");
@@ -18,7 +19,8 @@
       d: el.depth.value.trim(), du: el["depth-unit"].value,
       m: el.material.value, den: el.density.value.trim(),
       c: el.compact.checked ? 1 : 0, cp: el.compaction.value.trim(), ws: el.waste.value.trim(),
-      bk: el["bag-kg"].value.trim(), p: el.price.value.trim(), pu: el["price-unit"].value
+      bk: el["bag-kg"].value.trim(), p: el.price.value.trim(), pu: el["price-unit"].value,
+      lc: el.laying.checked ? 1 : 0, lcd: el["laying-depth"].value.trim()
     };
   }
 
@@ -38,6 +40,8 @@
     if (s.bk != null) el["bag-kg"].value = s.bk;
     if (s.p != null) el.price.value = s.p;
     if (s.pu) el["price-unit"].value = s.pu;
+    if (s.lc != null) el.laying.checked = !!s.lc;
+    if (s.lcd != null) el["laying-depth"].value = s.lcd;
   }
 
   function cell(k, v, u, big) {
@@ -89,6 +93,21 @@
       ' Order is about ' + r.tonnes + ' t = ' + r.bulkBags + ' bulk bag' + (r.bulkBags === 1 ? '' : 's') +
       ' at ' + r.bagKg + ' kg, or ' + r.handyBags + ' handy 25 kg bags.</p></div>';
 
+    var layingBlock = "";
+    if (r.layingCourse && r.layingCourse.ok) {
+      var lc = r.layingCourse;
+      layingBlock =
+        '<div class="result"><h3>Laying course (sharp sand)</h3>' +
+          '<div class="opt"><div class="opt-h">On top of the sub-base, for block paving or slabs</div>' +
+          '<div class="grid">' +
+            cell("Sharp sand", lc.tonnes, "t", true) +
+            cell("Bulk bags", lc.bulkBags, "") +
+            cell("Bed depth", lc.depthMm, "mm") +
+          '</div>' +
+          '<p class="opt-sub">A ' + lc.depthMm + ' mm sharp-sand bed over ' + r.areaM2 + ' m² at ' + lc.density +
+          ' t/m³. Order it with the sub-base so you’re not short on laying day.</p></div></div>';
+    }
+
     var advice = '<ul class="advice">' + r.advice.map(function (a) { return "<li>" + a + "</li>"; }).join("") + "</ul>";
 
     out.innerHTML =
@@ -101,6 +120,7 @@
         '</div>' +
       '</div>' +
       '<div class="result"><h3>The material</h3>' + matBox + '</div>' +
+      layingBlock +
       '<div class="result"><h3>What to do</h3>' + advice + '</div>';
 
     // Heavy if the order is a few tonnes (tipper territory), sub if it compacts,
@@ -121,7 +141,9 @@
       waste: s.ws === "" ? undefined : parseFloat(s.ws),
       bagKg: s.bk === "" ? undefined : parseFloat(s.bk),
       pricePerTonne: s.pu === "tonne" ? s.p : undefined,
-      pricePerBag: s.pu === "bag" ? s.p : undefined
+      pricePerBag: s.pu === "bag" ? s.p : undefined,
+      layingCourse: el.laying.checked,
+      layingCourseDepthMm: s.lcd === "" ? undefined : parseFloat(s.lcd)
     });
     var kind = render(r);
     if (window.Grit) window.Grit.react(kind);
