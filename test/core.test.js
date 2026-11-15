@@ -158,3 +158,32 @@ test("soft ground takes the deeper end and calls for a membrane", function () {
 test("an unknown job gives no suggestion", function () {
   assert.strictEqual(S.typicalDepth("spaceport", "firm"), null);
 });
+
+test("laying course: sharp sand tonnage for a bedding layer at 40 mm", () => {
+  // 20 m2 at 40 mm = 0.8 m3; +10% waste = 0.88 m3; x1.6 t/m3 = 1.408 -> 1.41 t
+  const lc = S.layingCourse(20, { waste: 10 });
+  assert.strictEqual(lc.ok, true);
+  assert.strictEqual(lc.depthMm, 40);
+  assert.strictEqual(lc.density, 1.6);
+  assert.strictEqual(lc.tonnes, 1.41);
+  assert.ok(lc.bulkBags >= 2);
+});
+
+test("laying course: a deeper bed needs more sand", () => {
+  const a = S.layingCourse(20, { depthMm: 30, waste: 0 });
+  const b = S.layingCourse(20, { depthMm: 50, waste: 0 });
+  assert.ok(b.tonnes > a.tonnes);
+});
+
+test("laying course: no area means not ok", () => {
+  assert.strictEqual(S.layingCourse(0).ok, false);
+});
+
+test("plan includes a laying course only when asked", () => {
+  const base = { length: { value: "4", unit: "m" }, width: { value: "5", unit: "m" }, depth: { value: "150", unit: "mm" }, material: "mot1" };
+  const without = S.plan(base);
+  assert.strictEqual(without.layingCourse, undefined);
+  const withLc = S.plan(Object.assign({ layingCourse: true, layingCourseDepthMm: 40 }, base));
+  assert.strictEqual(withLc.layingCourse.ok, true);
+  assert.strictEqual(withLc.layingCourse.depthMm, 40);
+});
