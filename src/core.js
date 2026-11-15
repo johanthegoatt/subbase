@@ -75,6 +75,39 @@
   function round1(x) { return Math.round(x * 10) / 10; }
   function round3(x) { return Math.round(x * 1000) / 1000; }
 
+  // Block paving and slabs don't sit straight on the sub-base: they go on a
+  // sharp-sand laying course (a bedding layer) on top, usually 30-50 mm thick.
+  // People order the sub-base and forget the bedding sand, then run short on the
+  // day. Given the same area, layingCourse works out the sharp-sand tonnage for
+  // that bed at a chosen depth. Sharp sand is about 1.6 t/m3 loose. Depths and
+  // the bedding idea follow Pavingexpert's block-paving and flag-laying guides.
+  var SHARP_SAND_DENSITY = 1.6;
+  function layingCourse(areaM2, opts) {
+    opts = opts || {};
+    var a = num(areaM2);
+    if (!(a > 0)) return { ok: false };
+    var depthMm = num(opts.depthMm);
+    if (!(depthMm > 0)) depthMm = 40;              // mid of the usual 30-50 mm
+    var density = num(opts.density);
+    if (!(density > 0)) density = SHARP_SAND_DENSITY;
+    var waste = num(opts.waste);
+    if (!(waste >= 0)) waste = 10;
+    var bagKg = num(opts.bagKg);
+    if (!(bagKg > 0)) bagKg = 850;
+    var vol = a * (depthMm / 1000) * (1 + waste / 100);
+    var tonnes = vol * density;
+    return {
+      ok: true,
+      depthMm: Math.round(depthMm),
+      density: round2(density),
+      volume: round2(vol),
+      tonnes: round2(tonnes),
+      kg: Math.round(tonnes * 1000),
+      bulkBags: Math.ceil((tonnes * 1000 - 1e-6) / bagKg),
+      handyBags: Math.ceil((tonnes * 1000 - 1e-6) / 25)
+    };
+  }
+
   // Work out the area to cover, either straight from an area box or from a
   // length and width. Returns square metres, or NaN if there's nothing usable.
   function area(opts) {
@@ -168,6 +201,16 @@
     else out.cost = null;
     out.costBasis = (isFinite(priceB) && priceB > 0) ? "bags" : (isFinite(priceT) && priceT > 0) ? "tonnes" : null;
 
+    // Optional sharp-sand laying course for block paving or slabs, worked out
+    // over the same area so it's ordered alongside the sub-base, not forgotten.
+    if (opts.layingCourse) {
+      out.layingCourse = layingCourse(a, {
+        depthMm: num(opts.layingCourseDepthMm) > 0 ? opts.layingCourseDepthMm : undefined,
+        bagKg: bagKg,
+        waste: waste
+      });
+    }
+
     out.advice = advise(out);
     return out;
   }
@@ -195,6 +238,13 @@
 
     if (r.waste > 0) {
       tips.push("The " + r.waste + "% waste margin covers spillage, an uneven base and levelling. A bulk bag can settle below its stated weight, so having a little over is normal.");
+    }
+
+    if (r.layingCourse && r.layingCourse.ok) {
+      var lc = r.layingCourse;
+      tips.push("Block paving and slabs also need a sharp-sand laying course on top of the sub-base: about " +
+        lc.tonnes + " tonne" + (lc.tonnes === 1 ? "" : "s") + " (" + lc.bulkBags + " bulk bag" +
+        (lc.bulkBags === 1 ? "" : "s") + ") at " + lc.depthMm + " mm over this area. Order it with the sub-base so you're not short on laying day.");
     }
 
     tips.push("Planning figures. Densities vary with moisture and the exact stone; a wet load weighs more than a dry one. Order from one supplier so the colour and grade match across bags.");
@@ -262,7 +312,7 @@
     IN: IN, FT: FT, YD: YD, MATERIALS: MATERIALS, USES: USES,
     toM: toM, areaToM2: areaToM2, area: area,
     round1: round1, round2: round2, round3: round3,
-    typicalDepth: typicalDepth,
+    typicalDepth: typicalDepth, layingCourse: layingCourse,
     plan: plan, advise: advise, pack: pack, unpack: unpack
   };
 });
