@@ -187,3 +187,28 @@ test("plan includes a laying course only when asked", () => {
   assert.strictEqual(withLc.layingCourse.ok, true);
   assert.strictEqual(withLc.layingCourse.depthMm, 40);
 });
+
+test("a deep sub-base is split into compaction layers of max 150 mm", () => {
+  // 300 mm MOT Type 1 (compacts) -> 2 layers of ~150 mm.
+  const r = S.plan({ length: { value: 5, unit: "m" }, width: { value: 4, unit: "m" }, depth: { value: 300, unit: "mm" }, material: "mot1" });
+  assert.strictEqual(r.layers, 2);
+  assert.strictEqual(r.maxLiftMm, 150);
+  assert.strictEqual(r.layerDepthMm, 150);
+  assert.ok(r.advice.some((t) => /2 layers/.test(t)));
+});
+
+test("a shallow sub-base is a single layer", () => {
+  const r = S.plan({ length: { value: 5, unit: "m" }, width: { value: 4, unit: "m" }, depth: { value: 100, unit: "mm" }, material: "mot1" });
+  assert.strictEqual(r.layers, 1);
+});
+
+test("a custom max lift changes the layer count", () => {
+  const r = S.plan({ length: { value: 5, unit: "m" }, width: { value: 4, unit: "m" }, depth: { value: 300, unit: "mm" }, material: "mot1", maxLiftMm: 100 });
+  assert.strictEqual(r.maxLiftMm, 100);
+  assert.strictEqual(r.layers, 3);
+});
+
+test("un-compacted gravel stays one layer regardless of depth", () => {
+  const r = S.plan({ length: { value: 5, unit: "m" }, width: { value: 4, unit: "m" }, depth: { value: 300, unit: "mm" }, material: "gravel", compact: false });
+  assert.strictEqual(r.layers, 1);
+});
