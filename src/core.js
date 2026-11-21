@@ -174,6 +174,18 @@
     // "one tonne covers X m² at Y mm" line on the product page.
     var coveragePerTonne = depth > 0 && density > 0 ? 1 / (depth * density) : 0;
 
+    // Compaction layers. A sub-base can't be whacked down in one go: a plate
+    // compactor only works through about 150 mm of loose stone at a time, so a
+    // deeper sub-base goes in and gets compacted in layers (lifts) no thicker
+    // than that, or the bottom never binds and the surface settles later. Laying
+    // guidance puts the limit around 100-150 mm a lift; the deeper figure is the
+    // default and it's editable. Decorative gravel you just rake isn't compacted,
+    // so it's a single layer.
+    var depthMm = Math.round(depth * 1000);
+    var maxLiftMm = num(opts.maxLiftMm);
+    if (!(maxLiftMm > 0)) maxLiftMm = 150;
+    var layers = compact ? Math.max(1, Math.ceil(depthMm / maxLiftMm - 1e-9)) : 1;
+
     var out = {
       ok: true,
       material: matKey,
@@ -183,7 +195,10 @@
       compaction: compPct,
       waste: waste,
       areaM2: round2(a),
-      depthMm: Math.round(depth * 1000),
+      depthMm: depthMm,
+      layers: layers,
+      maxLiftMm: maxLiftMm,
+      layerDepthMm: Math.round(depthMm / layers),
       finishedVol: round2(finishedVol),
       orderVol: round2(orderVol),
       tonnes: round2(tonnes),
@@ -226,8 +241,12 @@
       " tonnes per cubic metre here. A heavier stone means more tonnes for the same hole, so confirm the density on the supplier's own product page.");
 
     if (r.compacts && r.compaction > 0) {
+      var layerMsg = r.layers > 1
+        ? "At " + r.depthMm + " mm a plate compactor can't reach the bottom in one go, so lay and whack it in " + r.layers +
+          " layers of about " + r.layerDepthMm + " mm, compacting each before the next."
+        : "At " + r.depthMm + " mm it goes in a single layer; whack it down well before you build on it.";
       tips.push("A sub-base is laid loose and then whacked down, losing height, so I've added " + r.compaction +
-        "% extra to reach " + r.depthMm + " mm once compacted. Lay and compact it in layers no more than about 100 mm at a time.");
+        "% extra to reach " + r.depthMm + " mm once compacted. " + layerMsg);
     } else {
       tips.push("This material isn't compacted, so there's no compaction allowance — just rake it level to " +
         r.depthMm + " mm.");
