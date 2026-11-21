@@ -66,6 +66,7 @@
       cell("Tonnes", r.tonnes, "t", true) +
       cell("Bulk bags", r.bulkBags, "") +
       cell("Loose volume", r.orderVol, "m³") +
+      (r.compacts && r.layers > 1 ? cell("Compact in", r.layers, "layers") : "") +
       cell("Per tonne", r.coveragePerTonne, "m²") +
       (r.cost != null ? cell("Cost", r.cost, "") : "");
 
